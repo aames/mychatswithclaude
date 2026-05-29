@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   CaretDown,
   WaveformIcon,
@@ -11,14 +11,20 @@ import {
 } from './Icons';
 import type { ChatMeta } from '@/lib/chats';
 
+const MODELS = ['Opus 4.7', 'Sonnet 4.6', 'Haiku 4.5'];
+const REASONING = ['None', 'Low', 'Medium', 'High'];
+const ACTIONS = ['Write', 'Strategize', 'Career chat', 'From Calendar', 'From Gmail'];
+
 export function Greeting({ chats }: { chats: ChatMeta[] }) {
   const router = useRouter();
   const [value, setValue] = useState('');
+  const [model, setModel] = useState('Sonnet 4.6');
+  const [reasoning, setReasoning] = useState('Low');
+  const [activeAction, setActiveAction] = useState<string | null>(null);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!value.trim()) return;
-    // Spoof site: pretend the user "started" a chat by sending them to a random archived chat
     if (chats.length === 0) return;
     const random = chats[Math.floor(Math.random() * chats.length)];
     router.push(`/chats/${random.slug}`);
@@ -47,8 +53,18 @@ export function Greeting({ chats }: { chats: ChatMeta[] }) {
 
           <div className="flex items-center justify-between px-3 pb-3 pt-1 gap-2">
             <div className="flex items-center gap-2">
-              <ModelPill />
-              <ReasoningPill />
+              <Dropdown
+                value={model}
+                options={MODELS}
+                onChange={setModel}
+                label="Model"
+              />
+              <Dropdown
+                value={reasoning}
+                options={REASONING}
+                onChange={setReasoning}
+                label="Reasoning effort"
+              />
             </div>
             <div className="flex items-center gap-1">
               <IconButton title="Voice mode">
@@ -70,11 +86,15 @@ export function Greeting({ chats }: { chats: ChatMeta[] }) {
         </form>
 
         <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
-          <ActionChip>Write</ActionChip>
-          <ActionChip>Strategize</ActionChip>
-          <ActionChip>Career chat</ActionChip>
-          <ActionChip>From Calendar</ActionChip>
-          <ActionChip>From Gmail</ActionChip>
+          {ACTIONS.map((a) => (
+            <ActionChip
+              key={a}
+              active={activeAction === a}
+              onClick={() => setActiveAction(activeAction === a ? null : a)}
+            >
+              {a}
+            </ActionChip>
+          ))}
         </div>
 
         <p className="text-center text-[11px] text-muted mt-10 max-w-md mx-auto leading-relaxed">
@@ -86,27 +106,88 @@ export function Greeting({ chats }: { chats: ChatMeta[] }) {
   );
 }
 
-function ModelPill() {
+function Dropdown({
+  value,
+  options,
+  onChange,
+  label,
+}: {
+  value: string;
+  options: string[];
+  onChange: (v: string) => void;
+  label: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onDocClick(e: MouseEvent) {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
   return (
-    <button
-      type="button"
-      className="flex items-center gap-1 text-[12px] text-ink/70 hover:text-ink px-2 py-1 rounded hover:bg-rule/60"
-    >
-      Sonnet 4.6
-      <CaretDown className="w-3 h-3" />
-    </button>
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={label}
+        className="flex items-center gap-1 text-[12px] text-ink/70 hover:text-ink px-2 py-1 rounded hover:bg-rule/60"
+      >
+        {value}
+        <CaretDown className="w-3 h-3" />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-20 bottom-full left-0 mb-1 min-w-[140px] rounded-lg border border-rule bg-paper shadow-lg py-1"
+        >
+          {options.map((o) => {
+            const selected = o === value;
+            return (
+              <li key={o}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onChange(o);
+                    setOpen(false);
+                  }}
+                  className={[
+                    'w-full text-left px-3 py-1.5 text-[12px] flex items-center justify-between gap-3',
+                    selected ? 'text-ink bg-rule/60' : 'text-ink/80 hover:bg-rule/40',
+                  ].join(' ')}
+                >
+                  <span>{o}</span>
+                  {selected && <Check />}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }
 
-function ReasoningPill() {
+function Check() {
   return (
-    <button
-      type="button"
-      className="flex items-center gap-1 text-[12px] text-ink/70 hover:text-ink px-2 py-1 rounded hover:bg-rule/60"
-    >
-      Low
-      <CaretDown className="w-3 h-3" />
-    </button>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-clay">
+      <path d="m5 12 5 5L20 7" />
+    </svg>
   );
 }
 
@@ -128,11 +209,26 @@ function IconButton({
   );
 }
 
-function ActionChip({ children }: { children: React.ReactNode }) {
+function ActionChip({
+  children,
+  active,
+  onClick,
+}: {
+  children: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
-      className="text-[12px] text-ink/80 px-3 py-1.5 rounded-full border border-rule bg-paper hover:bg-rule/40 flex items-center gap-1.5"
+      onClick={onClick}
+      aria-pressed={active}
+      className={[
+        'text-[12px] px-3 py-1.5 rounded-full border flex items-center gap-1.5 transition-colors',
+        active
+          ? 'bg-clay/15 border-clay/40 text-clay'
+          : 'bg-paper border-rule text-ink/80 hover:bg-rule/40',
+      ].join(' ')}
     >
       {children}
     </button>
