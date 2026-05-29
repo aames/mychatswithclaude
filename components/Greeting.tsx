@@ -7,8 +7,8 @@ import {
   WaveformIcon,
   MicIcon,
   ArrowUpIcon,
-  StarIcon,
 } from './Icons';
+import { ClaudeLogo } from './ClaudeLogo';
 import { useSidebar } from './SidebarContext';
 import type { ChatMeta } from '@/lib/chats';
 
@@ -35,10 +35,11 @@ export function Greeting({ chats }: { chats: ChatMeta[] }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-2xl">
-        <h1 className="flex items-center justify-center gap-3 font-serif text-3xl sm:text-4xl text-ink mb-10">
-          <StarIcon className="w-5 h-5 text-clay/80" />
-          <span>Anonymous {animal} returns!</span>
-          <StarIcon className="w-5 h-5 text-clay/80" />
+        <div className="flex justify-center mb-4">
+          <ClaudeLogo className="w-14 h-14 text-clay" />
+        </div>
+        <h1 className="text-center font-serif text-3xl sm:text-4xl text-ink mb-10">
+          Anonymous {animal} returns!
         </h1>
 
         <form

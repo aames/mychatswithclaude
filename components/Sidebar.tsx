@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import type { ChatMeta } from '@/lib/chats';
 import { useSidebar } from './SidebarContext';
+import { ClaudeLogo } from './ClaudeLogo';
 import {
   NewChatIcon,
   SearchIcon,
@@ -232,12 +233,7 @@ function NavItem({
 function ClaudeWordmark() {
   return (
     <span className="flex items-center gap-1.5 font-serif text-base text-ink leading-none">
-      <span
-        aria-hidden
-        className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-clay text-paper text-[11px] font-semibold"
-      >
-        C
-      </span>
+      <ClaudeLogo className="w-5 h-5 text-clay" />
       Claude
     </span>
   );
