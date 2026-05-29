@@ -35,11 +35,9 @@ export function Greeting({ chats }: { chats: ChatMeta[] }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-2xl">
-        <div className="flex justify-center mb-4">
-          <ClaudeLogo className="w-14 h-14 text-clay" />
-        </div>
-        <h1 className="text-center font-serif text-3xl sm:text-4xl text-ink mb-10">
-          Anonymous {animal} returns!
+        <h1 className="flex items-center justify-center gap-3 sm:gap-4 font-serif text-3xl sm:text-4xl text-ink mb-10">
+          <ClaudeLogo className="w-8 h-8 sm:w-10 sm:h-10 text-clay shrink-0" />
+          <span>Anonymous {animal} returns!</span>
         </h1>
 
         <form
