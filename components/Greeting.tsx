@@ -9,6 +9,7 @@ import {
   ArrowUpIcon,
   StarIcon,
 } from './Icons';
+import { useSidebar } from './SidebarContext';
 import type { ChatMeta } from '@/lib/chats';
 
 const MODELS = ['Opus 4.7', 'Sonnet 4.6', 'Haiku 4.5'];
@@ -17,6 +18,7 @@ const ACTIONS = ['Write', 'Strategize', 'Career chat', 'From Calendar', 'From Gm
 
 export function Greeting({ chats }: { chats: ChatMeta[] }) {
   const router = useRouter();
+  const { animal } = useSidebar();
   const [value, setValue] = useState('');
   const [model, setModel] = useState('Sonnet 4.6');
   const [reasoning, setReasoning] = useState('Low');
@@ -35,7 +37,7 @@ export function Greeting({ chats }: { chats: ChatMeta[] }) {
       <div className="w-full max-w-2xl">
         <h1 className="flex items-center justify-center gap-3 font-serif text-3xl sm:text-4xl text-ink mb-10">
           <StarIcon className="w-5 h-5 text-clay/80" />
-          <span>Whoever you are returns!</span>
+          <span>Anonymous {animal} returns!</span>
           <StarIcon className="w-5 h-5 text-clay/80" />
         </h1>
 

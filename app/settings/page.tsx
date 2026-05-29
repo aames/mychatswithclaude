@@ -8,6 +8,7 @@ import {
   MoonIcon,
   AutoThemeIcon,
 } from '@/components/Icons';
+import { useSidebar } from '@/components/SidebarContext';
 
 const TABS = [
   'General',
@@ -18,29 +19,6 @@ const TABS = [
   'Claude Code',
 ] as const;
 type Tab = (typeof TABS)[number];
-
-const ANIMALS = [
-  'Wombat',
-  'Aardvark',
-  'Pangolin',
-  'Capybara',
-  'Axolotl',
-  'Quokka',
-  'Narwhal',
-  'Tapir',
-  'Manatee',
-  'Okapi',
-  'Numbat',
-  'Echidna',
-  'Platypus',
-  'Lemur',
-  'Sloth',
-  'Hedgehog',
-  'Marmot',
-  'Stoat',
-  'Tanuki',
-  'Binturong',
-];
 
 export default function SettingsPage() {
   const [tab, setTab] = useState<Tab>('General');
@@ -95,18 +73,16 @@ export default function SettingsPage() {
 }
 
 function GeneralTab() {
-  const [animal, setAnimal] = useState('Wombat');
-  const [name, setName] = useState('Anonymous Wombat');
-  const [nickname, setNickname] = useState('Anonymous Wombat');
+  const { animal } = useSidebar();
+  const [name, setName] = useState(`Anonymous ${animal}`);
+  const [nickname, setNickname] = useState(`Anonymous ${animal}`);
   const [work, setWork] = useState('Other');
   const [instructions, setInstructions] = useState('');
 
   useEffect(() => {
-    const pick = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
-    setAnimal(pick);
-    setName(`Anonymous ${pick}`);
-    setNickname(`Anonymous ${pick}`);
-  }, []);
+    setName(`Anonymous ${animal}`);
+    setNickname(`Anonymous ${animal}`);
+  }, [animal]);
   const [theme, setTheme] = useState<'light' | 'auto' | 'dark'>('light');
   const [font, setFont] = useState('Anthropic Serif');
   const [voice, setVoice] = useState('Buttery');

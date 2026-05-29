@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useMemo, useState } from 'react';
 import type { ChatMeta } from '@/lib/chats';
 import { useSidebar } from './SidebarContext';
 import {
@@ -21,10 +22,21 @@ import {
 
 export function Sidebar({ chats }: { chats: ChatMeta[] }) {
   const pathname = usePathname();
-  const { desktopHidden, mobileOpen, close, closeOnMobile } = useSidebar();
+  const { desktopHidden, mobileOpen, close, closeOnMobile, animal } = useSidebar();
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
   const activeSlug = pathname?.startsWith('/chats/')
     ? pathname.replace('/chats/', '')
     : undefined;
+
+  const sortedChats = useMemo(() => {
+    const copy = [...chats];
+    copy.sort((a, b) => {
+      if (a.date === b.date) return 0;
+      if (sortDir === 'desc') return a.date < b.date ? 1 : -1;
+      return a.date < b.date ? -1 : 1;
+    });
+    return copy;
+  }, [chats, sortDir]);
 
   return (
     <>
@@ -103,20 +115,21 @@ export function Sidebar({ chats }: { chats: ChatMeta[] }) {
           </span>
           <button
             type="button"
+            onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
             className="text-ink/40 hover:text-ink/70 p-1 rounded"
-            title="Sort chats"
-            aria-label="Sort chats"
+            title={sortDir === 'desc' ? 'Newest first (click for oldest)' : 'Oldest first (click for newest)'}
+            aria-label="Toggle sort order"
           >
             <SortIcon />
           </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-2 pb-2">
-          {chats.length === 0 && (
+          {sortedChats.length === 0 && (
             <p className="px-3 py-2 text-muted">No chats yet.</p>
           )}
           <ul>
-            {chats.map((c) => {
+            {sortedChats.map((c) => {
               const active = c.slug === activeSlug;
               return (
                 <li key={c.slug}>
@@ -149,11 +162,11 @@ export function Sidebar({ chats }: { chats: ChatMeta[] }) {
             aria-hidden
             className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-clay text-paper text-xs font-medium"
           >
-            W
+            {animal[0]}
           </span>
           <span className="flex-1 min-w-0">
             <span className="block text-ink leading-tight truncate">
-              Anonymous Wombat
+              Anonymous {animal}
             </span>
             <span className="block text-[11px] text-muted leading-tight truncate">
               Personal
