@@ -32,9 +32,13 @@ export function Sidebar({ chats }: { chats: ChatMeta[] }) {
   const sortedChats = useMemo(() => {
     const copy = [...chats];
     copy.sort((a, b) => {
-      if (a.date === b.date) return 0;
-      if (sortDir === 'desc') return a.date < b.date ? 1 : -1;
-      return a.date < b.date ? -1 : 1;
+      // Sort by date, then by title as a tiebreaker so chats with the same
+      // date still reorder when sort direction flips.
+      const aKey = `${a.date}|${a.title}`;
+      const bKey = `${b.date}|${b.title}`;
+      if (aKey === bKey) return 0;
+      if (sortDir === 'desc') return aKey < bKey ? 1 : -1;
+      return aKey < bKey ? -1 : 1;
     });
     return copy;
   }, [chats, sortDir]);
@@ -117,9 +121,10 @@ export function Sidebar({ chats }: { chats: ChatMeta[] }) {
           <button
             type="button"
             onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
-            className="text-ink/40 hover:text-ink/70 p-1 rounded"
+            className="text-ink/40 hover:text-ink/70 p-1 rounded transition-transform"
             title={sortDir === 'desc' ? 'Newest first (click for oldest)' : 'Oldest first (click for newest)'}
             aria-label="Toggle sort order"
+            style={{ transform: sortDir === 'asc' ? 'rotate(180deg)' : undefined }}
           >
             <SortIcon />
           </button>
