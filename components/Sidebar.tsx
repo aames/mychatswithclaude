@@ -1,0 +1,195 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import type { ChatMeta } from '@/lib/chats';
+import {
+  NewChatIcon,
+  SearchIcon,
+  ChatsIcon,
+  ProjectsIcon,
+  ArtifactsIcon,
+  CustomizeIcon,
+  CodeIcon,
+  DesignIcon,
+  CollapseIcon,
+  CaretUpDown,
+  DownloadIcon,
+  SortIcon,
+} from './Icons';
+
+export function Sidebar({ chats }: { chats: ChatMeta[] }) {
+  const pathname = usePathname();
+  const activeSlug = pathname?.startsWith('/chats/')
+    ? pathname.replace('/chats/', '')
+    : undefined;
+
+  return (
+    <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-rule bg-sidebar h-screen sticky top-0 text-[13px]">
+      {/* Logo row */}
+      <div className="flex items-center justify-between px-4 pt-3 pb-2">
+        <Link href="/" className="flex items-center gap-1.5">
+          <ClaudeWordmark />
+        </Link>
+        <button
+          type="button"
+          className="text-ink/50 hover:text-ink/80 p-1 rounded"
+          title="Collapse sidebar"
+          aria-label="Collapse sidebar"
+        >
+          <CollapseIcon />
+        </button>
+      </div>
+
+      {/* Primary nav */}
+      <nav className="px-2 pt-1 pb-2 space-y-0.5">
+        <NavItem href="/" icon={<NewChatIcon />} label="New chat" exact />
+        <NavItem href="/search" icon={<SearchIcon />} label="Search" disabled />
+        <NavItem href="/chats" icon={<ChatsIcon />} label="Chats" />
+        <NavItem href="/projects" icon={<ProjectsIcon />} label="Projects" disabled />
+        <NavItem href="/artifacts" icon={<ArtifactsIcon />} label="Artifacts" disabled />
+        <NavItem href="/customize" icon={<CustomizeIcon />} label="Customize" disabled />
+      </nav>
+
+      {/* Products section */}
+      <div className="px-4 pt-3 pb-1 text-[11px] uppercase tracking-wider text-muted">
+        Products
+      </div>
+      <nav className="px-2 pb-2 space-y-0.5">
+        <NavItem href="/code" icon={<CodeIcon />} label="Code" disabled />
+        <NavItem
+          href="/design"
+          icon={<DesignIcon />}
+          label="Design"
+          trailing={<CaretUpDown className="w-3 h-3 text-ink/40" />}
+          disabled
+        />
+      </nav>
+
+      {/* Recents section */}
+      <div className="flex items-center justify-between px-4 pt-3 pb-1">
+        <span className="text-[11px] uppercase tracking-wider text-muted">
+          Recents
+        </span>
+        <button
+          type="button"
+          className="text-ink/40 hover:text-ink/70 p-1 rounded"
+          title="Sort chats"
+          aria-label="Sort chats"
+        >
+          <SortIcon />
+        </button>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto px-2 pb-2">
+        {chats.length === 0 && (
+          <p className="px-3 py-2 text-muted">No chats yet.</p>
+        )}
+        <ul>
+          {chats.map((c) => {
+            const active = c.slug === activeSlug;
+            return (
+              <li key={c.slug}>
+                <Link
+                  href={`/chats/${c.slug}`}
+                  className={[
+                    'block rounded-md px-3 py-1.5 leading-snug truncate',
+                    active
+                      ? 'bg-rule text-ink'
+                      : 'text-ink/85 hover:bg-rule/70',
+                  ].join(' ')}
+                  title={c.title}
+                >
+                  {c.title}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* Profile chip */}
+      <Link
+        href="/settings"
+        className="flex items-center gap-2 px-3 py-2.5 border-t border-rule hover:bg-rule/40"
+      >
+        <span
+          aria-hidden
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-clay text-paper text-xs font-medium"
+        >
+          W
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-ink leading-tight truncate">Anonymous Wombat</span>
+          <span className="block text-[11px] text-muted leading-tight truncate">
+            Personal
+          </span>
+        </span>
+        <span className="text-ink/40 flex items-center gap-1">
+          <DownloadIcon className="w-3.5 h-3.5" />
+          <CaretUpDown className="w-3 h-3" />
+        </span>
+      </Link>
+    </aside>
+  );
+}
+
+function NavItem({
+  href,
+  icon,
+  label,
+  trailing,
+  exact = false,
+  disabled = false,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  trailing?: React.ReactNode;
+  exact?: boolean;
+  disabled?: boolean;
+}) {
+  const pathname = usePathname();
+  const active = exact ? pathname === href : pathname?.startsWith(href);
+
+  const classes = [
+    'flex items-center gap-2.5 rounded-md px-3 py-1.5 leading-snug',
+    disabled
+      ? 'text-ink/40 cursor-not-allowed'
+      : active
+      ? 'bg-rule text-ink'
+      : 'text-ink/85 hover:bg-rule/70',
+  ].join(' ');
+
+  if (disabled) {
+    return (
+      <div className={classes} title="Not available in this archive">
+        <span className="text-ink/50">{icon}</span>
+        <span className="flex-1">{label}</span>
+        {trailing}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={href} className={classes}>
+      <span className="text-ink/70">{icon}</span>
+      <span className="flex-1">{label}</span>
+      {trailing}
+    </Link>
+  );
+}
+
+function ClaudeWordmark() {
+  return (
+    <span className="flex items-center gap-1.5 font-serif text-base text-ink leading-none">
+      <span
+        aria-hidden
+        className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-clay text-paper text-[11px] font-semibold"
+      >
+        C
+      </span>
+      Claude
+    </span>
+  );
+}

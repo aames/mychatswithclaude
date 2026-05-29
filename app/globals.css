@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background-color: #faf9f5;
+  color: #1f1e1d;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Markdown prose inside assistant messages */
+.prose-claude p {
+  margin: 0.6em 0;
+  line-height: 1.65;
+}
+.prose-claude h1,
+.prose-claude h2,
+.prose-claude h3 {
+  font-weight: 600;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+}
+.prose-claude h1 { font-size: 1.4rem; }
+.prose-claude h2 { font-size: 1.2rem; }
+.prose-claude h3 { font-size: 1.05rem; }
+.prose-claude code {
+  background: #efede4;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.prose-claude pre {
+  background: #1f1e1d;
+  color: #f5f4ee;
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+.prose-claude pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+.prose-claude ul,
+.prose-claude ol {
+  padding-left: 1.4em;
+  margin: 0.6em 0;
+}
+.prose-claude ul { list-style: disc; }
+.prose-claude ol { list-style: decimal; }
+.prose-claude li { margin: 0.25em 0; }
+.prose-claude a {
+  color: #c96442;
+  text-decoration: underline;
+}
+.prose-claude blockquote {
+  border-left: 3px solid #e8e6dd;
+  padding-left: 1em;
+  color: #5c5b56;
+  margin: 0.8em 0;
+}
