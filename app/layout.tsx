@@ -1,6 +1,8 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Sidebar } from '@/components/Sidebar';
+import { SidebarProvider } from '@/components/SidebarContext';
+import { TopBar } from '@/components/TopBar';
 import { getAllChatMeta } from '@/lib/chats';
 
 export const metadata: Metadata = {
@@ -18,10 +20,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-paper text-ink">
-        <div className="flex min-h-screen">
-          <Sidebar chats={chats} />
-          <main className="flex-1 min-w-0 flex flex-col">{children}</main>
-        </div>
+        <SidebarProvider>
+          <div className="flex min-h-screen">
+            <Sidebar chats={chats} />
+            <main className="flex-1 min-w-0 flex flex-col">
+              <TopBar />
+              {children}
+            </main>
+          </div>
+        </SidebarProvider>
       </body>
     </html>
   );

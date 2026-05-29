@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { ChatView } from '@/components/ChatView';
 import { Footer } from '@/components/Footer';
-import { TopBar } from '@/components/TopBar';
 import { getAllChatMeta, getChat } from '@/lib/chats';
 
 type Params = Promise<{ slug: string }>;
@@ -26,7 +25,6 @@ export default async function ChatPage({ params }: { params: Params }) {
   if (!chat) notFound();
   return (
     <>
-      <TopBar />
       <ChatView chat={chat} />
       <Footer />
     </>

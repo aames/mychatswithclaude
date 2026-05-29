@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Footer } from '@/components/Footer';
-import { TopBar } from '@/components/TopBar';
 import {
   CaretDown,
   SunIcon,
@@ -20,12 +19,34 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number];
 
+const ANIMALS = [
+  'Wombat',
+  'Aardvark',
+  'Pangolin',
+  'Capybara',
+  'Axolotl',
+  'Quokka',
+  'Narwhal',
+  'Tapir',
+  'Manatee',
+  'Okapi',
+  'Numbat',
+  'Echidna',
+  'Platypus',
+  'Lemur',
+  'Sloth',
+  'Hedgehog',
+  'Marmot',
+  'Stoat',
+  'Tanuki',
+  'Binturong',
+];
+
 export default function SettingsPage() {
   const [tab, setTab] = useState<Tab>('General');
 
   return (
     <>
-      <TopBar />
       <div className="flex-1 px-4 sm:px-8 pb-16">
         <div className="mx-auto w-full max-w-5xl">
           <h1 className="font-serif text-4xl text-ink mb-8 mt-2">Settings</h1>
@@ -74,10 +95,18 @@ export default function SettingsPage() {
 }
 
 function GeneralTab() {
+  const [animal, setAnimal] = useState('Wombat');
   const [name, setName] = useState('Anonymous Wombat');
   const [nickname, setNickname] = useState('Anonymous Wombat');
   const [work, setWork] = useState('Other');
   const [instructions, setInstructions] = useState('');
+
+  useEffect(() => {
+    const pick = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+    setAnimal(pick);
+    setName(`Anonymous ${pick}`);
+    setNickname(`Anonymous ${pick}`);
+  }, []);
   const [theme, setTheme] = useState<'light' | 'auto' | 'dark'>('light');
   const [font, setFont] = useState('Anthropic Serif');
   const [voice, setVoice] = useState('Buttery');
@@ -93,7 +122,7 @@ function GeneralTab() {
           aria-hidden
           className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-clay text-paper text-base font-medium"
         >
-          W
+          {animal[0]}
         </span>
       </Row>
 

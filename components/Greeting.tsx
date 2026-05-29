@@ -35,7 +35,7 @@ export function Greeting({ chats }: { chats: ChatMeta[] }) {
       <div className="w-full max-w-2xl">
         <h1 className="flex items-center justify-center gap-3 font-serif text-3xl sm:text-4xl text-ink mb-10">
           <StarIcon className="w-5 h-5 text-clay/80" />
-          <span>Anonymous Wombat returns!</span>
+          <span>Whoever you are returns!</span>
           <StarIcon className="w-5 h-5 text-clay/80" />
         </h1>
 

@@ -1,13 +1,11 @@
 import Link from 'next/link';
 import { Footer } from '@/components/Footer';
-import { TopBar } from '@/components/TopBar';
 import { getAllChatMeta } from '@/lib/chats';
 
 export default function ChatsIndex() {
   const chats = getAllChatMeta();
   return (
     <>
-      <TopBar />
       <div className="flex-1 px-4 sm:px-8 pb-16">
         <div className="mx-auto w-full max-w-3xl">
           <h1 className="font-serif text-3xl text-ink mb-2">Your chats</h1>
