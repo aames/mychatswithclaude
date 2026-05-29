@@ -10,7 +10,7 @@ An unofficial fan archive of conversations with Claude, styled like claude.ai.
 ```markdown
 ---
 title: "Title of the chat"
-date: "2026-05-29"
+date: "2026-05-29T20:45:00"
 summary: "One-line teaser shown on the home page and chat header."
 ---
 

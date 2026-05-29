@@ -1,6 +1,6 @@
 ---
 title: "Why does my dog attack me when the rugby is on?"
-date: "2026-05-29"
+date: "2026-05-29T20:45:00"
 summary: "Triangulating, with Claude, why my otherwise chill shih-tzu turns on me for 80 minutes every Saturday."
 ---
 

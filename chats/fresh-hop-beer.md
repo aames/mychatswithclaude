@@ -1,6 +1,6 @@
 ---
 title: "Why is fresh hop beer so addictively delicious?"
-date: "2026-05-29"
+date: "2026-05-29T21:30:00"
 summary: "Trying to understand the wet-hop phenomenon, why it's so good, and how to tell a real one from a gimmick."
 ---
 
