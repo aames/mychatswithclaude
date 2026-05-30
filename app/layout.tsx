@@ -71,6 +71,13 @@ export default function RootLayout({
         >
           <GitHubIcon className="w-5 h-5" />
         </a>
+        {/* Cloudflare Web Analytics */}
+        <script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "890de6d544cc4367a5f2ea55a69c65b7"}'
+        />
+        {/* End Cloudflare Web Analytics */}
       </body>
     </html>
   );
