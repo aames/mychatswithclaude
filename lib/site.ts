@@ -19,6 +19,16 @@ export const SITE_KEYWORDS = [
   'ask Claude',
 ];
 
+// Social share card (1200x630). A static PNG in public/, based on the site
+// logo. Regenerate by restoring app/opengraph-image.tsx, running the build,
+// and copying out/opengraph-image to public/og.png.
+export const OG_IMAGE = {
+  url: `${SITE_URL}/og.png`,
+  width: 1200,
+  height: 630,
+  alt: `${SITE_NAME} — real conversations with Claude`,
+};
+
 // Build an absolute URL for a given path. The site exports without trailing
 // slashes (next.config.js has no `trailingSlash`), so match that here.
 export function absoluteUrl(path = ''): string {

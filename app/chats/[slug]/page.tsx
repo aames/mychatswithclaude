@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { ChatView } from '@/components/ChatView';
 import { Footer } from '@/components/Footer';
 import { getAllChatMeta, getChat } from '@/lib/chats';
-import { absoluteUrl, SITE_NAME, SITE_KEYWORDS } from '@/lib/site';
+import { absoluteUrl, SITE_NAME, SITE_KEYWORDS, OG_IMAGE } from '@/lib/site';
 
 type Params = Promise<{ slug: string }>;
 
@@ -38,11 +38,13 @@ export async function generateMetadata({
       url,
       siteName: SITE_NAME,
       publishedTime: chat.date || undefined,
+      images: [OG_IMAGE],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [OG_IMAGE.url],
     },
   };
 }

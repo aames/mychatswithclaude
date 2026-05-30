@@ -5,7 +5,7 @@ import { SidebarProvider } from '@/components/SidebarContext';
 import { TopBar } from '@/components/TopBar';
 import { GitHubIcon } from '@/components/Icons';
 import { getAllChatMeta } from '@/lib/chats';
-import { SITE_URL, SITE_NAME, SITE_KEYWORDS } from '@/lib/site';
+import { SITE_URL, SITE_NAME, SITE_KEYWORDS, OG_IMAGE } from '@/lib/site';
 
 const description =
   'An unofficial fan archive of funny, weird, and occasionally useful conversations with Claude, Anthropic’s AI assistant.';
@@ -23,11 +23,13 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description,
     url: SITE_URL,
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE_NAME,
     description,
+    images: [OG_IMAGE.url],
   },
   robots: {
     index: true,
