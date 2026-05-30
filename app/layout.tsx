@@ -5,11 +5,40 @@ import { SidebarProvider } from '@/components/SidebarContext';
 import { TopBar } from '@/components/TopBar';
 import { GitHubIcon } from '@/components/Icons';
 import { getAllChatMeta } from '@/lib/chats';
+import { SITE_URL, SITE_NAME, SITE_KEYWORDS } from '@/lib/site';
+
+const description =
+  'An unofficial fan archive of funny, weird, and occasionally useful conversations with Claude, Anthropic’s AI assistant.';
 
 export const metadata: Metadata = {
-  title: 'My Chats With Claude',
-  description:
-    'An unofficial fan archive of funny, weird, and occasionally useful conversations with Claude.',
+  metadataBase: new URL(SITE_URL),
+  title: SITE_NAME,
+  description,
+  keywords: SITE_KEYWORDS,
+  applicationName: SITE_NAME,
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description,
+    url: SITE_URL,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_NAME,
+    description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({

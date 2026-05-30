@@ -1,7 +1,7 @@
 ---
 title: "Is the KFC logo a bowtie or the Colonel's body?"
 date: "2026-05-30T17:30:00"
-summary: "The viral 'it's not a bowtie, it's his body!' claim is a false dichotomy — the logo is both."
+summary: "I asked Claude whether the KFC logo is a bowtie or the Colonel's body — turns out the viral 'it's his body!' claim is a false dichotomy, and the logo is both."
 ---
 
 ## User
