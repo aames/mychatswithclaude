@@ -20,8 +20,8 @@ export const SITE_KEYWORDS = [
 ];
 
 // Social share card (1200x630). A static PNG in public/, based on the site
-// logo. Regenerate by restoring app/opengraph-image.tsx, running the build,
-// and copying out/opengraph-image to public/og.png.
+// logo. Regenerate with the generator in scripts/og-image.tsx (instructions at
+// the top of that file).
 export const OG_IMAGE = {
   url: `${SITE_URL}/og.png`,
   width: 1200,
