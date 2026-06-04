@@ -36,14 +36,20 @@ export function AsciiCanvas({
     ctx.textBaseline = 'top';
 
     const render = () => {
-      let t = playing ? clock() : 0;
-      if (loop && source.durationSec > 0) t %= source.durationSec;
+      // The clock freezes itself when paused, so always read it. Loop wraps;
+      // otherwise clamp to the last frame so it holds on the final image.
+      let t = clock();
+      if (source.durationSec > 0) {
+        t = loop
+          ? t % source.durationSec
+          : Math.min(t, source.durationSec - 1e-3);
+      }
 
       const frame = source.frameAt(t);
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const lines = frame.chars.split('\n');
+      const lines = (frame.chars ?? '').split('\n');
       for (let y = 0; y < lines.length; y++) {
         const line = lines[y];
         for (let x = 0; x < line.length; x++) {

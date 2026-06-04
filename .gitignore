@@ -6,3 +6,8 @@ out
 .env*.local
 next-env.d.ts
 Screenshots/
+
+# /friday easter-egg media is hosted on a CDN (see NEXT_PUBLIC_FRIDAY_* env
+# vars); keep the heavy local capture files out of the repo.
+public/friday/clip.json
+public/friday/audio.webm

@@ -1,10 +1,11 @@
 // Turns a committed FridayClip (frames + palette) into a FrameSource the player
 // can scrub by time. Content-agnostic: it just replays whatever was captured.
 
-import type { FridayClip, FrameSource, ResolvedFrame } from './types';
+import type { FridayClip, FrameSource, ResolvedFrame, ClipMode } from './types';
 
 export function clipToSource(clip: FridayClip): FrameSource {
   const { cols, rows, fps, palette, frames } = clip;
+  const mode: ClipMode = clip.mode ?? 'ascii';
   const durationSec = frames.length / fps;
 
   // Pre-decode palette-index buffers once.
@@ -14,6 +15,7 @@ export function clipToSource(clip: FridayClip): FrameSource {
   }));
 
   return {
+    mode,
     cols,
     rows,
     durationSec,
@@ -27,14 +29,16 @@ export function clipToSource(clip: FridayClip): FrameSource {
       for (let i = 0; i < fr.keys.length; i++) {
         colors[i] = palette[fr.keys[i]] ?? '#000000';
       }
-      return { cols, rows, chars: fr.chars, colors };
+      return { cols, rows, colors, chars: fr.chars };
     },
   };
 }
 
 export async function loadClip(url: string): Promise<FridayClip | null> {
   try {
-    const res = await fetch(url, { cache: 'force-cache' });
+    // Cache-bust so a freshly captured clip.json is always picked up rather
+    // than a stale browser-cached copy.
+    const res = await fetch(`${url}?v=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return (await res.json()) as FridayClip;
   } catch {

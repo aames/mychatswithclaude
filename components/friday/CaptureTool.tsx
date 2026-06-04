@@ -1,26 +1,28 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { imageDataToAscii } from '@/lib/friday/ascii';
 import { bytesToBase64 } from '@/lib/friday/clip';
 import { createBitcrusher } from '@/lib/friday/bitcrush';
+import { medianCut } from '@/lib/friday/palette';
+import type { RGB } from '@/lib/friday/palette';
 import type { FridayClip, FridayFrame } from '@/lib/friday/types';
 
-const COLS = 80;
-const ROWS = 45;
 const FPS = 15;
 
 type Status = 'idle' | 'recording' | 'done';
 
 // Captures whatever tab you share via getDisplayMedia, turning its VIDEO into
-// color-ASCII frames and its AUDIO into a bitcrushed (8-bit-style) recording.
-// Both are content-agnostic transforms of YOUR captured stream.
+// faithful high-res pixel-art frames (adaptive palette sampled from the source)
+// and its AUDIO into a bitcrushed (8-bit-style) recording. Content-agnostic
+// transforms of YOUR captured stream.
 export function CaptureTool() {
   const [status, setStatus] = useState<Status>('idle');
   const [log, setLog] = useState<string[]>([]);
-  const [seconds, setSeconds] = useState(10);
+  const [seconds, setSeconds] = useState(60);
   const [bits, setBits] = useState(6);
   const [reduction, setReduction] = useState(6);
+  const [cols, setCols] = useState(256); // NES-native width
+  const [colors, setColors] = useState(128);
 
   const clipRef = useRef<FridayClip | null>(null);
   const audioBlobRef = useRef<Blob | null>(null);
@@ -47,39 +49,38 @@ export function CaptureTool() {
 
     say('● Capturing — pick the YouTube tab and SHARE TAB AUDIO.');
 
-    // --- video → ascii frames ---
+    // --- video → pixel frames ---
     const video = document.createElement('video');
     video.srcObject = stream;
     video.muted = true;
     await video.play();
 
+    // Square pixel cells: rows follow the real source aspect ratio.
+    const COLS = cols;
+    const vw = video.videoWidth || 16;
+    const vh = video.videoHeight || 9;
+    const ROWS = Math.max(8, Math.round(COLS * (vh / vw)));
+    say(`▦ grid ${COLS}×${ROWS} (source ${vw}×${vh})`);
+
+    // Smooth downscale: draw video → small canvas with interpolation on.
     const scratch = document.createElement('canvas');
     scratch.width = COLS;
     scratch.height = ROWS;
     const sctx = scratch.getContext('2d', { willReadFrequently: true })!;
+    sctx.imageSmoothingEnabled = true;
+    sctx.imageSmoothingQuality = 'high';
 
-    const palette: string[] = [];
-    const paletteIndex = new Map<string, number>();
-    const internColor = (hex: string): number => {
-      let i = paletteIndex.get(hex);
-      if (i === undefined) {
-        i = palette.length;
-        palette.push(hex);
-        paletteIndex.set(hex, i);
-      }
-      return i;
-    };
-
-    const frames: FridayFrame[] = [];
+    // Pass 1: store raw RGB per frame + collect color samples for the palette.
+    const rawFrames: Uint8ClampedArray[] = [];
+    const samples: RGB[] = [];
     const captureFrame = () => {
       sctx.drawImage(video, 0, 0, COLS, ROWS);
-      const img = sctx.getImageData(0, 0, COLS, ROWS);
-      const resolved = imageDataToAscii(img, COLS, ROWS);
-      const keys = new Uint8Array(COLS * ROWS);
-      for (let i = 0; i < keys.length; i++) {
-        keys[i] = internColor(quantize(resolved.colors[i]));
+      const img = sctx.getImageData(0, 0, COLS, ROWS).data;
+      rawFrames.push(new Uint8ClampedArray(img));
+      // Subsample (every 5th pixel) to keep median-cut fast on long clips.
+      for (let i = 0; i < img.length; i += 4 * 5) {
+        samples.push([img[i], img[i + 1], img[i + 2]]);
       }
-      frames.push({ c: resolved.chars, k: bytesToBase64(keys) });
     };
 
     // --- audio → bitcrushed recording ---
@@ -130,10 +131,32 @@ export function CaptureTool() {
       };
     });
 
-    clipRef.current = { cols: COLS, rows: ROWS, fps: FPS, palette, frames };
-    say(`✓ Done: ${frames.length} frames, ${palette.length} colors.`);
+    // Pass 2: build an ADAPTIVE palette from the source's own colors, then map
+    // every pixel to its nearest palette entry. No dithering — keep it crisp.
+    say(`◐ Building ${colors}-color palette from ${samples.length} samples…`);
+    const pal = medianCut(samples, colors);
+    const frames: FridayFrame[] = rawFrames.map((img) => {
+      const keys = new Uint8Array(COLS * ROWS);
+      for (let p = 0; p < COLS * ROWS; p++) {
+        const o = p * 4;
+        keys[p] = pal.indexOf(img[o], img[o + 1], img[o + 2]);
+      }
+      return { k: bytesToBase64(keys) };
+    });
+
+    clipRef.current = {
+      mode: 'pixel',
+      cols: COLS,
+      rows: ROWS,
+      fps: FPS,
+      palette: pal.hex,
+      frames,
+    };
+    say(
+      `✓ Done: ${frames.length} frames, ${pal.hex.length} colors @ ${COLS}×${ROWS}.`,
+    );
     setStatus('done');
-  }, [seconds, bits, reduction]);
+  }, [seconds, bits, reduction, cols, colors]);
 
   const downloadClip = () => {
     if (!clipRef.current) return;
@@ -153,17 +176,17 @@ export function CaptureTool() {
         <h1 className="text-2xl mb-2">/friday capture</h1>
         <p className="text-green-600 text-sm mb-6">
           Share a browser tab (e.g. a YouTube video) <b>with tab audio</b>. Its
-          video becomes color-ASCII frames; its audio is bitcrushed to 8-bit.
-          Download both files into <code>public/friday/</code> and commit.
+          video becomes retro pixel-art frames; its audio is bitcrushed to
+          8-bit. Download both files into <code>public/friday/</code> and commit.
         </p>
 
-        <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-sm">
           <label className="flex flex-col gap-1">
             seconds
             <input
               type="number"
               min={1}
-              max={30}
+              max={120}
               value={seconds}
               onChange={(e) => setSeconds(+e.target.value)}
               className="bg-green-950/40 border border-green-800 px-2 py-1"
@@ -188,6 +211,30 @@ export function CaptureTool() {
               max={32}
               value={reduction}
               onChange={(e) => setReduction(+e.target.value)}
+              className="bg-green-950/40 border border-green-800 px-2 py-1"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            width px (128–384)
+            <input
+              type="number"
+              min={128}
+              max={384}
+              step={16}
+              value={cols}
+              onChange={(e) => setCols(+e.target.value)}
+              className="bg-green-950/40 border border-green-800 px-2 py-1"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            colors (16–256)
+            <input
+              type="number"
+              min={16}
+              max={256}
+              step={16}
+              value={colors}
+              onChange={(e) => setColors(+e.target.value)}
               className="bg-green-950/40 border border-green-800 px-2 py-1"
             />
           </label>
@@ -225,15 +272,6 @@ export function CaptureTool() {
       </div>
     </div>
   );
-}
-
-// Quantize a hex color to a coarser grid to keep the palette small.
-function quantize(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const q = (n: number) => (Math.round(n / 32) * 32).toString(16).padStart(2, '0');
-  return '#' + q(r) + q(g) + q(b);
 }
 
 function pickMime(): string {
