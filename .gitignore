@@ -11,3 +11,7 @@ Screenshots/
 # vars); keep the heavy local capture files out of the repo.
 public/friday/clip.json
 public/friday/audio.webm
+
+# /birthday easter-egg media (see NEXT_PUBLIC_BIRTHDAY_* env vars); same deal.
+public/birthday/clip.json
+public/birthday/audio.webm
