@@ -15,3 +15,10 @@ public/friday/audio.webm
 # /birthday easter-egg media (see NEXT_PUBLIC_BIRTHDAY_* env vars); same deal.
 public/birthday/clip.json
 public/birthday/audio.webm
+# A supplied surround image (e.g. the truck photo) stays local — not
+# redistributed via the repo.
+public/birthday/sp.png
+public/birthday/cake.png
+public/birthday/cake.jpg
+public/birthday/cake.jpeg
+public/birthday/cake.webp

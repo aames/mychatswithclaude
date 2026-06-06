@@ -3,18 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AsciiCanvas } from '@/components/friday/AsciiCanvas';
 import { PixelCanvas } from '@/components/friday/PixelCanvas';
-import { CakeFrame } from './CakeFrame';
+import { HaflingerFrame } from './HaflingerFrame';
 import { createBirthdaySource } from '@/lib/birthday/placeholder';
 import { clipToSource, loadClip } from '@/lib/friday/clip';
 import type { FrameSource } from '@/lib/friday/types';
 
-// Clip/audio are large, so hosted on a CDN. Override via NEXT_PUBLIC_* env vars;
-// falls back to local files under public/birthday/ for dev. NOTE: clip.json must
-// be served with CORS or the cross-origin fetch will be blocked.
+// Clip/audio are large, so hosted on a CDN (Bunny). Override via NEXT_PUBLIC_*
+// env vars (e.g. point at local /birthday/* files for dev). The CDN files are
+// served with CORS, which the cross-origin fetch requires.
 const CLIP_URL =
-  process.env.NEXT_PUBLIC_BIRTHDAY_CLIP_URL || '/birthday/clip.json';
+  process.env.NEXT_PUBLIC_BIRTHDAY_CLIP_URL || 'https://kool.b-cdn.net/clip.json';
 const AUDIO_URL =
-  process.env.NEXT_PUBLIC_BIRTHDAY_AUDIO_URL || '/birthday/audio.webm';
+  process.env.NEXT_PUBLIC_BIRTHDAY_AUDIO_URL ||
+  'https://kool.b-cdn.net/audio.webm';
 
 type Phase = 'boot' | 'playing' | 'ended';
 
@@ -113,81 +114,81 @@ export function BirthdayPlayer() {
     };
   }, []);
 
+  // The screen (canvas + end overlay), placed inside whichever frame is active.
+  // Fixed ~5:4 box so the surround never reflows when the clip swaps in; the
+  // canvas fills it edge-to-edge.
+  const screenContent = (
+    <div className="relative aspect-[5/4] w-full [&>canvas]:h-full [&>canvas]:w-full [&>canvas]:object-cover">
+      {source.mode === 'pixel' ? (
+        <PixelCanvas
+          source={source}
+          clock={clock}
+          playing={phase === 'playing' && !paused}
+          loop={false}
+        />
+      ) : (
+        <AsciiCanvas
+          source={source}
+          clock={clock}
+          playing={phase === 'playing' && !paused}
+          loop={false}
+        />
+      )}
+
+      {phase === 'ended' && (
+        <button
+          onClick={begin}
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/60 font-serif text-[#d8d98a]"
+        >
+          <span className="text-3xl sm:text-5xl tracking-widest">↻ REPLAY</span>
+          <span className="text-xs text-[#a7ad6a] tracking-[0.3em]">
+            HAPPY 40th — KEEP ON TRUCKIN&rsquo;
+          </span>
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div
       className="fixed inset-0 flex items-center justify-center overflow-hidden p-4 sm:p-8"
       style={{
         background:
-          'radial-gradient(circle at 50% 35%, #2a1622 0%, #140a10 70%, #000 100%)',
+          'radial-gradient(circle at 50% 35%, #3a3f27 0%, #20240f 65%, #0c0d06 100%)',
       }}
     >
       {phase === 'boot' ? (
         <button
           onClick={begin}
-          className="z-20 flex flex-col items-center gap-6 font-serif text-amber-300"
+          className="z-20 flex flex-col items-center gap-6 font-mono text-[#c9c94e]"
         >
-          <span className="text-5xl sm:text-7xl tracking-widest animate-pulse">
-            🎂 PRESS PLAY
+          <span className="font-serif text-5xl sm:text-7xl tracking-widest animate-pulse text-[#d8d98a]">
+            🛻 PRESS PLAY
           </span>
-          <span className="text-sm sm:text-base text-amber-400/70 tracking-[0.3em]">
-            [ MAKE A WISH ]
+          <span className="text-sm sm:text-base text-[#a7ad6a] tracking-[0.4em]">
+            [ START ENGINE ]
           </span>
-          <span className="mt-8 text-[10px] text-amber-200/40 tracking-widest font-mono">
-            {hasAudio ? 'AUDIO: READY' : 'AUDIO: SILENT — visuals only'}
+          <span className="mt-8 text-[10px] text-[#7c8150] tracking-widest">
+            {hasAudio ? 'SYSTEMS: GO' : 'AUDIO: SILENT — visuals only'}
           </span>
         </button>
       ) : (
         <div className="w-full max-w-4xl">
-          <CakeFrame>
-            {/* Fixed-size screen so the cake never reflows when the clip (a
-                different aspect ratio to the placeholder) swaps in. Box is ~5:4
-                to match the captured clip; the canvas fills it edge-to-edge. */}
-            <div className="relative aspect-[5/4] w-full [&>canvas]:h-full [&>canvas]:w-full [&>canvas]:object-cover">
-              {source.mode === 'pixel' ? (
-                <PixelCanvas
-                  source={source}
-                  clock={clock}
-                  playing={phase === 'playing' && !paused}
-                  loop={false}
-                />
-              ) : (
-                <AsciiCanvas
-                  source={source}
-                  clock={clock}
-                  playing={phase === 'playing' && !paused}
-                  loop={false}
-                />
-              )}
-
-              {phase === 'ended' && (
-                <button
-                  onClick={begin}
-                  className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-black/60 font-serif text-amber-200"
-                >
-                  <span className="text-3xl sm:text-5xl tracking-widest">
-                    ↻ REPLAY
-                  </span>
-                  <span className="text-xs text-amber-300/80 tracking-[0.3em]">
-                    HAPPY 40th — MANY HAPPY RETURNS
-                  </span>
-                </button>
-              )}
-            </div>
-          </CakeFrame>
+          <HaflingerFrame>{screenContent}</HaflingerFrame>
 
           {phase === 'playing' && (
             <div className="mt-6 flex items-center justify-center gap-4 font-serif">
               <button
                 onClick={togglePause}
                 aria-label={paused ? 'Play' : 'Pause'}
-                className="px-5 py-2 rounded-full border border-amber-400 text-amber-200 hover:bg-amber-400 hover:text-black transition-colors tracking-widest"
+                className="px-5 py-2 rounded-full border border-[#a7ad6a] text-[#d8d98a] hover:bg-[#a7ad6a] hover:text-black transition-colors tracking-widest"
               >
                 {paused ? '▶ PLAY' : '❚❚ PAUSE'}
               </button>
               <button
                 onClick={finish}
                 aria-label="Stop"
-                className="px-5 py-2 rounded-full border border-amber-800 text-amber-500 hover:bg-amber-800 hover:text-black transition-colors tracking-widest"
+                className="px-5 py-2 rounded-full border border-[#5e6b3a] text-[#7c8150] hover:bg-[#5e6b3a] hover:text-black transition-colors tracking-widest"
               >
                 ■ STOP
               </button>
